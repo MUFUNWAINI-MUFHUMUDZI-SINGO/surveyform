@@ -5,18 +5,18 @@ $password = "";
 $database = "survey";
 
 $conn = new mysqli($host, $user, $password, $database);
-
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Clean and retrieve form data
     $full_name = isset($_POST['full_name']) ? $conn->real_escape_string(trim($_POST['full_name'])) : '';
     $email = isset($_POST['email']) ? $conn->real_escape_string(trim($_POST['email'])) : '';
     $dob = isset($_POST['dob']) ? $conn->real_escape_string(trim($_POST['dob'])) : '';
     $contact_number = isset($_POST['contact_number']) ? $conn->real_escape_string(trim($_POST['contact_number'])) : '';
     $favorite_foods = isset($_POST['favorite_food']) ? $_POST['favorite_food'] : [];
-    
+
     $escaped_foods = array_map(function($food) use ($conn) {
         return $conn->real_escape_string($food);
     }, $favorite_foods);
@@ -27,8 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $eat_out = isset($_POST['eat_out']) ? intval($_POST['eat_out']) : 0;
     $watch_tv = isset($_POST['watch_tv']) ? intval($_POST['watch_tv']) : 0;
 
-    // You might want to validate here on server side as well.
-
+    // Insert into database
     $sql = "INSERT INTO survey_responses (
         full_name, email, dob, contact_number, favorite_food,
         watch_movies, listen_radio, eat_out, watch_tv
@@ -37,10 +36,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $watch_movies, $listen_radio, $eat_out, $watch_tv
     )";
 
-  }
+    if ($conn->query($sql) === TRUE) {
+        echo "<script>alert('Survey submitted successfully!');</script>";
+    } else {
+        echo "<script>alert('Error: " . $conn->error . "');</script>";
+    }
+}
 
 $conn->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en" >
